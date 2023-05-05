@@ -2,18 +2,19 @@
 
 let QRCODE = null;
 
-const readFile = ()=> {
-  const input = document.getElementById('fileSelector');
-  if (input == null) {
-    console.log("input is null");
+const readPdfFile = ()=> {
+  const pdfInput = document.getElementById('pdfSelector');
+  if (pdfInput == null) {
+    console.log("PDF Input is null");
     return;
   }
   const reader = new FileReader();
   reader.addEventListener('load', readPDF);
-  reader.readAsArrayBuffer(input.files[0]);
+  reader.readAsArrayBuffer(pdfInput.files[0]);
 };
 
 const readPDF = async (event)=> {
+  clearLink();
   const typedarray = new Uint8Array(event.target.result);
   const loadingTask = pdfjsLib.getDocument(typedarray);
   const pdfDocument = await loadingTask.promise;
@@ -27,18 +28,41 @@ const readPage = async (pdfDocument, pageNum)=> {
   const textContent = await page.getTextContent();
   const pageText = textContent.items.map(function(item) {return item.str;}).join('');
   //console.log(`Page ${pageNum}: ${extractUrls(pageText)}`);
-  for (let link of linkify.find(pageText)) appendLink(link);
+  for (let link of linkify.find(pageText)) appendLink(link.value);
 };
 
 const appendLink = (link)=> {
+  if (link === "") return;
   const list = document.getElementById('list');
   const li = document.createElement('li');
   const url = document.createElement('button');
-  url.innerHTML = link.value;
+  url.innerHTML = link;
   url.addEventListener('click', make_qrcode_event);
   li.appendChild(url);
   list.appendChild(li);
 }
+
+const clearLink = ()=> {
+  const list = document.getElementById('list');
+  list.innerHTML = "";
+}
+
+const readTextFile = ()=> {
+  clearLink();
+  const textInput = document.getElementById('textSelector');
+  if (textInput == null) {
+    console.log("Text Input is null");
+    return;
+  }
+  const reader = new FileReader();
+  reader.addEventListener('load', readText);
+  reader.readAsText(textInput.files[0]);
+};
+
+const readText = async (event)=> {
+  const fileContent = event.target.result;
+  for (let line of fileContent.split(/\r?\n/)) appendLink(line);
+};
 
 /*
 const extractUrls = (textContent) => {
@@ -52,9 +76,10 @@ const extractUrls = (textContent) => {
 */
 
 const onLoad = ()=> {
-  const input = document.getElementById('fileSelector');
-  //console.log(input);
-  input.addEventListener('change', readFile);
+  const pdfInput = document.getElementById('pdfSelector');
+  if (pdfInput != null) pdfInput.addEventListener('change', readPdfFile);
+  const textInput = document.getElementById('textSelector');
+  if (textInput != null) textInput.addEventListener('change', readTextFile);
   if (QRCODE === null) QRCODE = new QRCode(document.getElementById("qrcode"), "");
 }
 

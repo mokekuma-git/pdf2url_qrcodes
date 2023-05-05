@@ -1,14 +1,16 @@
 <html>
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/linkifyjs@4.1.1/dist/linkify.min.js"></script>
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
 <script src="script/pdf2url.js"></script>
 </head>
 <body onload="onLoad()">
     <div id="qrcode" style="position: fixed; top: 0; right: 0; z-index: 100;"></div>
     直接入力<input type="text" id="url" onchange="make_qrcode(this.value)" style="width:600;"> (EnterでQRコード作成) <br/>
-    PDF入力<input type="file" accept=".pdf" id="fileSelector"><hr/>
+    URLリスト入力<input type="file" accept=".txt" id="textSelector"><br/>
+    PDF入力<input type="file" accept=".pdf" id="pdfSelector"><hr/>
     <ol id="list"></ol>
 </body>
 </html>
