@@ -61,5 +61,13 @@ options:
   --zip_file ZIP_FILE   QRコードを保存するzipファイル名 (default: qrcodes.zip)
   --more_files [MORE_FILES ...]
                         追加ファイルのリスト (default: [])
-  ```
-  
+```
+
+
+## pdf2url.js
+PDFファイルからURL文字列を抜き出し、あるいはURLリストを直接与えてブラウザ上でQRコードを作成  
+個別Downloadと一括Downloadの操作に対応
+ 
+![image](https://user-images.githubusercontent.com/84721916/236431680-2d187d0d-a943-4c04-9a71-b6a01d23979f.png)
+
+SVGはまだ実装中
