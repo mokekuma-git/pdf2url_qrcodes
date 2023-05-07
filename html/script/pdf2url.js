@@ -10,18 +10,18 @@
  * @param {string} type: 画像フォーマット (PNG, SVG)
  */
 const OPTION = {
-  "cellSize": 2,
-  "margin": 4,
-  "errorCorrectionLevel": "L",
-  "version": 0,
-  "mode": "Byte",
-  "type": "PNG",
-  "listWithIndex": false
-}
+  cellSize: 2,
+  margin: 4,
+  errorCorrectionLevel: "L",
+  version: 0,
+  mode: "Byte",
+  type: "PNG",
+  listWithIndex: false,
+};
 
 /**
  * PDFファイルセレクタを元にPDFファイルを読み込む
- * 
+ *
  * 1ページごとにreadPageで読み込み、読み込んだURL文字列毎にappendLinkを呼び出す
  * @returns {Promise} readPDFのPromise
  */
@@ -38,7 +38,7 @@ function readPdfFile() {
 
 /**
  * PDFファイルセレクタの読み込み完了イベントを受けて、PDFファイルを読み込む
- * 
+ *
  * 1ページごとにreadPageで読み込み、読み込んだURL文字列毎にappendContentを呼び出す
  * @param {Event} event PDFファイルセレクタの読み込み完了イベント
  */
@@ -54,7 +54,7 @@ async function readPDF(event) {
 
 /**
  * PDFファイルのページを読み込む
- * 
+ *
  * 指定されたページのテキストを読み込み、読み込んだURL文字列毎にappendContentを呼び出す
  * @param {PDFDocumentProxy} pdfDocument PDFドキュメント
  * @param {number} pageNum ページ番号
@@ -62,14 +62,18 @@ async function readPDF(event) {
 async function readPage(pdfDocument, pageNum) {
   const page = await pdfDocument.getPage(pageNum);
   const textContent = await page.getTextContent();
-  const pageText = textContent.items.map(function (item) { return item.str; }).join("");
+  const pageText = textContent.items
+    .map(function (item) {
+      return item.str;
+    })
+    .join("");
   //console.log(`Page ${pageNum}: ${extractUrls(pageText)}`);
   for (let link of linkify.find(pageText)) appendContent(link.value);
 }
 
 /**
  * 与えられたQRコード化対象文字列をリストに追加する
- * 
+ *
  * 各要素はボタンとして作成、クリックするとQRコードを生成・表示
  * @param {string} link QRコード化対象文字列
  */
@@ -94,7 +98,7 @@ function clearContentList() {
 
 /**
  * テキストファイルセレクタを元にテキストファイルを読み込む
- * 
+ *
  * 1行ごとにappendContentを呼び出す
  * @returns {Promise} readTextのPromise
  */
@@ -112,7 +116,7 @@ function readTextFile() {
 
 /**
  * テキストファイルセレクタの読み込み完了イベントを受けて、テキストファイルを読み込む
- * 
+ *
  * 1行ごとにappendContentを呼び出す
  * @param {Event} event テキストファイルセレクタの読み込み完了イベント
  */
@@ -120,7 +124,7 @@ async function readText(event) {
   const fileContent = event.target.result;
   for (let line of fileContent.split(/\r?\n/)) {
     if (line === "") continue;
-    if (OPTION.listWithIndex) line = line.replace(/^\d+\s/, '');
+    if (OPTION.listWithIndex) line = line.replace(/^\d+\s/, "");
     appendContent(line);
   }
 }
@@ -137,16 +141,14 @@ function extractUrls(textContent) {
 
 /**
  * 初期化処理
- * 
+ *
  * EventListenerの登録、設定フォームの作成
  */
 function onLoad() {
   const pdfInput = document.getElementById("pdfSelector");
-  if (pdfInput != null)
-    pdfInput.addEventListener("change", readPdfFile);
+  if (pdfInput != null) pdfInput.addEventListener("change", readPdfFile);
   const textInput = document.getElementById("textSelector");
-  if (textInput != null)
-    textInput.addEventListener("change", readTextFile);
+  if (textInput != null) textInput.addEventListener("change", readTextFile);
   const listWithIndexInput = document.getElementById("listWithIndex");
   if (listWithIndexInput != null)
     listWithIndexInput.addEventListener("change", function (event) {
@@ -154,11 +156,10 @@ function onLoad() {
     });
   const contentInput = document.getElementById("content");
   if (contentInput != null)
-    contentInput.addEventListener("change",
-      function (event) {
-        console.log(event.target.value);
-        makeQrcodeView(event.target.value);
-      });
+    contentInput.addEventListener("change", function (event) {
+      console.log(event.target.value);
+      makeQrcodeView(event.target.value);
+    });
   createSettings();
   const dl_latest = document.getElementById("download_latest");
   if (dl_latest != null) {
@@ -180,10 +181,12 @@ function onLoad() {
 function createSettings() {
   const settings = document.getElementById("settings");
   // Error Correction Level
-  settings.appendChild(document.createTextNode("エラー訂正レベル(修正可能割合): "));
+  settings.appendChild(
+    document.createTextNode("エラー訂正レベル(修正可能割合): ")
+  );
   const select = document.createElement("select");
   select.id = "errorCorrectionLevel";
-  const levels = { "L": 7, "M": 15, "Q": 20, "H": 30 };
+  const levels = { L: 7, M: 15, Q: 20, H: 30 };
   for (let lv of Object.keys(levels)) {
     const opt = document.createElement("option");
     opt.value = lv;
@@ -225,7 +228,7 @@ function createSettings() {
   settings.appendChild(document.createTextNode("画像フォーマット: "));
   const type = document.createElement("select");
   type.id = "type";
-  const types = { "PNG": "PNG", "SVG": "SVG" };
+  const types = { PNG: "PNG", SVG: "SVG" };
   for (let t of Object.keys(types)) {
     const opt = document.createElement("option");
     opt.value = t;
@@ -244,27 +247,40 @@ function createSettings() {
  * @param {string} content QRコード化対象文字列
  */
 function makeQrcodeView(content) {
-  document.getElementById("qrcode").innerHTML = makeQrcodeTag(content);
+  document.getElementById("qrcode").innerHTML = makeQrcodeElement(content);
 }
 
 /**
- * type指定に合わせてQRコード要素を生成する
+ * type指定に合わせてQRコード要素内容を生成する
  *
- * @param {string} content 
- * @returns 
+ * @param {string} content
+ * @returns
  */
-function makeQrcodeTag(content) {
+function makeQrcodeElement(content) {
   // TODO: 毎回作るけどそれで良い？
   const qr = qrcode(OPTION.version, OPTION.errorCorrectionLevel);
   qr.addData(content, OPTION.mode);
   qr.make();
-  if (OPTION.type === "SVG")
-    return qr.createSvgTag({"cellSize": OPTION.cellSize, "margine": OPTION.margin});
+  if (OPTION.type.toUpperCase() === "SVG")
+    return qr.createSvgTag({
+      cellSize: OPTION.cellSize,
+      margine: OPTION.margin,
+    });
   return qr.createImgTag(OPTION.cellSize, OPTION.margin);
 }
 
+/**
+ * 指定された文字列からHTML要素を生成する
+ *
+ * @param {string} elementStr HTML要素内容を表す文字列
+ * @returns
+ */
 function makeElement(elementStr) {
-  const div = document.createElement("div");
+  let div = document.getElementById("newElementParent");
+  if (div == null) {
+    div = document.createElement("div");
+    div.id = "newElementParent";
+  }
   div.innerHTML = elementStr.trim();
   return div.firstChild;
 }
@@ -281,42 +297,59 @@ function makeQrcodeByButton(event) {
 }
 
 /**
- * 表示中のQRコードをGIFファイルとしてBlobに変換する
+ * 与えられたQRコード要素を画像ファイルとしてBlobに変換する
  *
  * 表示結果が無い時はnullを返す
+ * @param {Element} img QRコード要素
  * @returns {Promise} BlobのPromise
  */
-function makeGifBlob() {
-  const img = document.getElementById("qrcode").getElementsByTagName("img")[0];
+function makeImageBlob(img) {
   if (img == null) return null;
-  return gif2blob(img);
+  if (img.tagName.toUpperCase() === "SVG") return svg2blob(img);
+  return png2blob(img);
+}
+let IMG_ELEMENT;
+
+/**
+ * 表示中のQRコードをSVGファイルとしてBlobに変換する
+ *
+ * @param {SVGElement} img 表示中のQRコード
+ */
+async function svg2blob(img) {
+  const svg = img.outerHTML;
+  return new Blob([svg], { type: "image/svg+xml" });
 }
 
 /**
- * 表示中のQRコードをGIFファイルとしてBlobに変換する
+ * 表示中のQRコードをPNGファイルとしてBlobに変換する
  *
  * @param {HTMLImageElement} img 表示中のQRコード
  * @returns {Promise} Blobオブジェクト生成のPromise
  */
-async function gif2blob(img) {
+async function png2blob(img) {
   await img.decode();
   const canvas = document.createElement("canvas");
   canvas.width = img.width;
   canvas.height = img.height;
   const ctx = canvas.getContext("2d");
   ctx.drawImage(img, 0, 0);
-  return new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
 
 /**
- * 表示中のQRコードをGIFファイルとしてダウンロードする
+ * 表示中のQRコードを画像ファイルとしてダウンロードする
  */
 function downloadZipOnView() {
   return async function () {
-    const blob = await makeGifBlob();
-    if (blob == null)
-      return;
-    downloadLink(blob, document.getElementById("content").value + getExtention(OPTION.type));
+    const blob = await makeImageBlob(
+      document.getElementById("qrcode").firstChild
+    );
+    if (blob == null) return;
+    downloadLink(
+      blob,
+      replaceEscape(document.getElementById("content").value) +
+        getExtention(blob.type)
+    );
   };
 }
 
@@ -326,11 +359,13 @@ function downloadZipOnView() {
 function downloadList() {
   return async function () {
     const list = document.getElementById("list");
-    const files = Array.from(list.getElementsByTagName("li")).map((li, index) => {
-      if (OPTION.listWithIndex)
-        return index + " " + li.getElementsByTagName("button")[0].innerHTML;
-      return li.getElementsByTagName("button")[0].innerHTML;
-    });
+    const files = Array.from(list.getElementsByTagName("li")).map(
+      (li, index) => {
+        if (OPTION.listWithIndex)
+          return index + " " + li.getElementsByTagName("button")[0].innerHTML;
+        return li.getElementsByTagName("button")[0].innerHTML;
+      }
+    );
     const blob = new Blob([files.join("\n")], { type: "text/plain" });
     downloadLink(blob, "urls.txt");
   };
@@ -344,14 +379,15 @@ function downloadZipAll() {
   const list = document.getElementById("list");
   Array.from(list.getElementsByTagName("li")).forEach((li, index) => {
     const content = li.getElementsByTagName("button")[0].innerHTML;
-    files[makeFilePath(content, index)] = gif2blob(makeElement(makeQrcodeTag(content)));
+    const blob = makeImageBlob(makeElement(makeQrcodeElement(content)));
+    files[makeFilePath(content, index, OPTION.type)] = blob;
   });
-  makeZip(files);
+  downloadZip(files);
 }
 
 /**
  * ファイル名を作成する
- * 
+ *
  * @param {string} content QRコード化対象文字列
  * @param {number} index ファイル番号
  * @returns {string} ファイル名
@@ -362,12 +398,16 @@ function makeFilePath(content, index) {
 
 /**
  * 画像フォーマットに合わせた拡張子を返す
- * 
- * @param {string} type 画像フォーマット
+ *
+ * @param {string} type 画像フォーマット (tag名またはMIMEタイプ)
  * @returns {string} 拡張子
  */
 function getExtention(type) {
-  if (type === "SVG") return ".svg";
+  if (
+    type.toUpperCase() === "SVG" ||
+    type.toLocaleLowerCase() === "image/svg+xml"
+  )
+    return ".svg";
   return ".png";
 }
 
@@ -379,8 +419,7 @@ function getExtention(type) {
  * @returns {string} ファイル名
  */
 function makeFileName(content, index) {
-  if (OPTION.listWithIndex)
-    return index + " " + replaceEscape(content);
+  if (OPTION.listWithIndex) return index + " " + replaceEscape(content);
   return replaceEscape(content);
 }
 
@@ -393,18 +432,21 @@ function makeFileName(content, index) {
 function replaceEscape(content) {
   return content.replace(/[\\/:*?"<>|]+/g, "_");
 }
- 
+
 /**
  * 指定されたファイルリストから、Zipファイルを作成・ダウンロードさせる
  *
  * @param {Object} files ファイルリスト {ファイル名: ファイル内容BlobのPromise, ...}
  */
-function makeZip(files) {
+function downloadZip(files) {
   let zip = new JSZip();
-  Object.keys(files).forEach(function (name) {zip.file(name, files[name])});
+  Object.keys(files).forEach(function (name) {
+    zip.file(name, files[name]);
+  });
   //zip.file(file.name, file.content);
-  zip.generateAsync({ type: "blob" })
-    .then(function (content) {downloadLink(content, "qrcodes.zip");});
+  zip.generateAsync({ type: "blob" }).then(function (content) {
+    downloadLink(content, "qrcodes.zip");
+  });
 }
 
 /**
@@ -416,7 +458,7 @@ function makeZip(files) {
 function downloadLink(blob, filename) {
   const downloadLink = document.createElement("a");
   downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = filename
+  downloadLink.download = filename;
 
   // ダウンロードリンクをクリックしてダウンロードを開始する
   document.body.appendChild(downloadLink);
