@@ -2,12 +2,13 @@
 
 /**
  * QRコード生成オプション
- * @param {string} callSize: セルのサイズ
- * @param {string} margin: 余白
+ * @param {number} callSize: セルのサイズ
+ * @param {number} margin: 余白
  * @param {string} errorCorrectionLevel: エラー訂正レベル
- * @param {string} version: バージョン (QRコードサイズ、0で自動選択)
+ * @param {number} version: バージョン (QRコードサイズ、0で自動選択)
  * @param {string} mode: モード (Byte, Numeric, Alphanumeric, Kanji) // Byte以外は未確認
  * @param {string} type: 画像フォーマット (PNG, SVG)
+ * @param {boolean} listWithIndex: リストにインデックスを付ける (true) か否か (false)
  */
 const OPTION = {
   cellSize: 2,
