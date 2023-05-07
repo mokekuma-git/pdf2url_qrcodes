@@ -10,10 +10,13 @@
     <div id="settings"></div>
     <div id="qrcode" style="position: fixed; top: 0; right: 0; z-index: 100;"></div>
     直接入力<input type="text" id="content" style="width:600;"> (EnterでQRコード作成) <br/>
-    URLリスト入力<input type="file" accept=".txt" id="textSelector"><br/>
+    URLリスト入力<input type="file" accept=".txt" id="textSelector">
+    <input type="checkbox" id="listWithIndex">リストファイル、一括作成Zipのファイル名はインデックス付き<br/>
     PDF入力<input type="file" accept=".pdf" id="pdfSelector"><br/>
     <input type="button" id="download_latest" value="表示中結果ダウンロード">
-    <input type="button" id="download_zip" value="一括作成Zipダウンロード"> <hr/>
+    <input type="button" id="download_zip" value="一括作成Zipダウンロード">
+    <input type="button" id="download_list" value="リストダウンロード">
+    <hr/>
     <ol id="list"></ol>
 </body>
 </html>

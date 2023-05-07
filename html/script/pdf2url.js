@@ -15,7 +15,8 @@ const OPTION = {
   "errorCorrectionLevel": "L",
   "version": 0,
   "mode": "Byte",
-  "type": "PNG"
+  "type": "PNG",
+  "listWithIndex": false
 }
 
 /**
@@ -117,8 +118,11 @@ function readTextFile() {
  */
 async function readText(event) {
   const fileContent = event.target.result;
-  for (let line of fileContent.split(/\r?\n/))
+  for (let line of fileContent.split(/\r?\n/)) {
+    if (line === "") continue;
+    if (OPTION.listWithIndex) line = line.replace(/^\d+\s/, '');
     appendContent(line);
+  }
 }
 
 /*
@@ -143,6 +147,11 @@ function onLoad() {
   const textInput = document.getElementById("textSelector");
   if (textInput != null)
     textInput.addEventListener("change", readTextFile);
+  const listWithIndexInput = document.getElementById("listWithIndex");
+  if (listWithIndexInput != null)
+    listWithIndexInput.addEventListener("change", function (event) {
+      OPTION.listWithIndex = event.target.checked;
+    });
   const contentInput = document.getElementById("content");
   if (contentInput != null)
     contentInput.addEventListener("change",
@@ -153,15 +162,15 @@ function onLoad() {
   createSettings();
   const dl_latest = document.getElementById("download_latest");
   if (dl_latest != null) {
-    dl_latest.addEventListener("click", async function () {
-      const blob = await makeGifBlob();
-      if (blob == null) return;
-      downloadLink(blob, document.getElementById("content").value + ".png");
-    });
+    dl_latest.addEventListener("click", downloadZipOnView());
   }
   const dl_zip = document.getElementById("download_zip");
   if (dl_zip != null) {
-    dl_zip.addEventListener("click", makeZipAll);
+    dl_zip.addEventListener("click", downloadZipAll);
+  }
+  const dl_list = document.getElementById("download_list");
+  if (dl_list != null) {
+    dl_list.addEventListener("click", downloadList());
   }
 }
 
@@ -255,7 +264,7 @@ function makeQrcodeTag(content) {
 }
 
 function makeElement(elementStr) {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.innerHTML = elementStr.trim();
   return div.firstChild;
 }
@@ -300,16 +309,79 @@ async function gif2blob(img) {
 }
 
 /**
+ * 表示中のQRコードをGIFファイルとしてダウンロードする
+ */
+function downloadZipOnView() {
+  return async function () {
+    const blob = await makeGifBlob();
+    if (blob == null)
+      return;
+    downloadLink(blob, document.getElementById("content").value + getExtention(OPTION.type));
+  };
+}
+
+/**
+ * QRコード化対象文字列リストをテキストファイルとしてダウンロードする
+ */
+function downloadList() {
+  return async function () {
+    const list = document.getElementById("list");
+    const files = Array.from(list.getElementsByTagName("li")).map((li, index) => {
+      if (OPTION.listWithIndex)
+        return index + " " + li.getElementsByTagName("button")[0].innerHTML;
+      return li.getElementsByTagName("button")[0].innerHTML;
+    });
+    const blob = new Blob([files.join("\n")], { type: "text/plain" });
+    downloadLink(blob, "urls.txt");
+  };
+}
+
+/**
  * 表示中の全QRコード化対象文字列からQRコードを作成し、Zipファイルとしてダウンロードする
  */
-function makeZipAll() {
+function downloadZipAll() {
   const files = {};
   const list = document.getElementById("list");
-  for (let li of list.getElementsByTagName("li")) {
+  Array.from(list.getElementsByTagName("li")).forEach((li, index) => {
     const content = li.getElementsByTagName("button")[0].innerHTML;
-    files["qrcode/" + replaceEscape(content) + ".png"] = gif2blob(makeElement(makeQrcodeTag(content)));
-  }
+    files[makeFilePath(content, index)] = gif2blob(makeElement(makeQrcodeTag(content)));
+  });
   makeZip(files);
+}
+
+/**
+ * ファイル名を作成する
+ * 
+ * @param {string} content QRコード化対象文字列
+ * @param {number} index ファイル番号
+ * @returns {string} ファイル名
+ */
+function makeFilePath(content, index) {
+  return "qrcode/" + makeFileName(content, index) + getExtention(OPTION.type);
+}
+
+/**
+ * 画像フォーマットに合わせた拡張子を返す
+ * 
+ * @param {string} type 画像フォーマット
+ * @returns {string} 拡張子
+ */
+function getExtention(type) {
+  if (type === "SVG") return ".svg";
+  return ".png";
+}
+
+/**
+ * ファイル名を作成する
+ *
+ * @param {string} content QRコード化対象文字列
+ * @param {number} index ファイル番号
+ * @returns {string} ファイル名
+ */
+function makeFileName(content, index) {
+  if (OPTION.listWithIndex)
+    return index + " " + replaceEscape(content);
+  return replaceEscape(content);
 }
 
 /**
